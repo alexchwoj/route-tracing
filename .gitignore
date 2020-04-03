@@ -1,4 +1,4 @@
-# Fodler
+# Folders
 scriptfiles/
 filterscripts/
 gamemodes/
@@ -6,6 +6,7 @@ plugins/
 
 # Prerequisites
 *.d
+*.dat
 
 # Compiled Object files
 *.slo
@@ -38,5 +39,7 @@ plugins/
 *.out
 *.app
 
-# Config files
+# Config files and log files
 *.cfg
+*.txt
+*.log

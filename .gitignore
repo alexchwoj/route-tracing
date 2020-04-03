@@ -1,3 +1,9 @@
+# Fodler
+scriptfiles/
+filterscripts/
+gamemodes/
+plugins/
+
 # Prerequisites
 *.d
 
@@ -5,6 +11,7 @@
 *.slo
 *.lo
 *.o
+*.amx
 *.obj
 
 # Precompiled Headers
@@ -30,3 +37,6 @@
 *.exe
 *.out
 *.app
+
+# Config files
+*.cfg

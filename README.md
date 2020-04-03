@@ -23,6 +23,9 @@ public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
 }
 ```
 
+## Demostration
+![](https://i.imgur.com/hn8QaUV.png)
+
 ## Fuctions
 ```pawn
 StartTracing(playerid, Float:x, Float:y, Float:z);
@@ -32,5 +35,5 @@ GetTracingColor(playerid);
 ```
 
 ## Credits
-RealAtom - Programing
-kristoisberg - Modern GPS Plugin
+* [Atom](https://github.com/RealAtom) - Programming
+* [kristo](https://github.com/kristoisberg) - Modern GPS Plugin

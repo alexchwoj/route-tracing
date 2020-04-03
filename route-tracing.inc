@@ -12,6 +12,8 @@
 #include <a_samp>
 #include <GPS>
 
+#define ROUTE_TRACING_VERSION "0.0.1"
+
 /* Core */
 forward OnRouteCalculated(Path:pathid, playerid);
 
@@ -182,7 +184,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 /* ReDifinition */
 public OnGameModeInit()
 {
-	printf("[-] route-tracing by Atom initialized successfully [-]");
+	printf("[-] route-tracing v"ROUTE_TRACING_VERSION" by Atom initialized successfully [-]");
 	
 	#if defined OT_OnGameModeInit
 		return OT_OnGameModeInit();

@@ -7,7 +7,7 @@ Path layout for San Andreas Multiplayer.
 2. Put the `route-tracing.inc` file in `pawno/include`
 3. Enter this line in your initial script
 ```pawn
-#include <route-tracing.inc>
+#include <route-tracing>
 ```
 4. Install [Modern GPS](https://github.com/kristoisberg/samp-gps-plugin)
 5. Put `GPS.dat` file in `scriptfiles/`

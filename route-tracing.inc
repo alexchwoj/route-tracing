@@ -66,15 +66,14 @@ stock GetTracingColor(playerid)
 }
 
 /* Updating */
-stock Float:ReturnRouteDistance(Float:init_x, Float:init_y, Float:init_z, Float:final_x, Float:final_y, Float:final_z)
+stock Float:ReturnRouteDistance(Float:init_x, Float:init_y, Float:final_x, Float:final_y)
 {
 	new 
 		Float:dis_x = floatpower( floatsub(init_x, final_x), 2.0),
-		Float:dis_y = floatpower( floatsub(init_y, final_y), 2.0),
-		Float:dis_z = floatpower( floatsub(init_z, final_z), 2.0)
+		Float:dis_y = floatpower( floatsub(init_y, final_y), 2.0)
 	;
 
-	return floatsqroot( floatadd( floatadd( dis_x, dis_y), dis_z));
+	return floatsqroot( floatadd( dis_x, dis_y));
 }
 
 forward UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z);
@@ -87,7 +86,7 @@ public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 	;
 
 	GetPlayerPos(playerid, pos[0], pos[1], pos[2]);
-	init_distance = ReturnRouteDistance(x, y, 0.0, pos[0], pos[1], 0.0);
+	init_distance = ReturnRouteDistance(x, y, pos[0], pos[1]);
 
 	if (init_distance <= 2.0) return CancelTracing(playerid);
 	if (GetClosestMapNodeToPoint(pos[0], pos[1], pos[2], point[0]) != 0) return 0;
@@ -135,7 +134,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 
 		if(x == index)
 		{
-			new node_size = floatround( ReturnRouteDistance(pos[3], pos[4], 0.0, pos[0], pos[1], 0.0) / 12.5);
+			new node_size = floatround( ReturnRouteDistance(pos[3], pos[4], pos[0], pos[1]) / 12.5);
 
 			for(new i = 1; i <= node_size; i++)
 			{

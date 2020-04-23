@@ -3,6 +3,7 @@ scriptfiles/
 filterscripts/
 gamemodes/
 plugins/
+dependencies/
 
 # Prerequisites
 *.d

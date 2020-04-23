@@ -223,12 +223,12 @@ public OnPlayerConnect(playerid)
 	forward RT_OnPlayerConnect(playerid);
 #endif
 
-public OnPlayerDisconnect(playerid)
+public OnPlayerDisconnect(playerid, reason)
 {
 	CancelTracing(playerid);
 
 	#if defined RT_OnPlayerDisconnect
-		return RT_OnPlayerDisconnect(playerid);
+		return RT_OnPlayerDisconnect(playerid, reason);
 	#else
 		return 1;
 	#endif
@@ -241,5 +241,5 @@ public OnPlayerDisconnect(playerid)
 
 #define OnPlayerDisconnect RT_OnPlayerDisconnect
 #if defined RT_OnPlayerDisconnect
-	forward RT_OnPlayerDisconnect(playerid);
+	forward RT_OnPlayerDisconnect(playerid, reason);
 #endif

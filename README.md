@@ -40,3 +40,5 @@ GetTracingColor(playerid);
 
 ### Discord
 [![Foo](https://discordapp.com/api/guilds/586980198910656521/embed.png?style=banner2)](https://discord.gg/JDm38dX)
+
+saluditos a citylife, sampfive, sampblue

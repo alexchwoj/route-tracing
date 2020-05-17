@@ -37,7 +37,3 @@ GetTracingColor(playerid);
 ## Credits
 * [Atom](https://github.com/RealAtom) - Programming
 * [kristo](https://github.com/kristoisberg) - Modern GPS Plugin
-
-Donate (BTC)
-
-`1CMEPuTPtEKRRbPokRp9vTqoJNVNmm1GXt`

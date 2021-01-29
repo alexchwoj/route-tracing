@@ -25,7 +25,6 @@ enum player_gps
 }
 static GPS_PLAYER[MAX_PLAYERS][player_gps];
 static GPS_PLAYER_GANGZONES[MAX_PLAYERS][50];
-
 static GPS_LPPLAYER[MAX_PLAYERS][3];
 
 /* Tracing */
@@ -86,9 +85,12 @@ public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 		MapNode:point[2]
 	;
 
-	if (GPS_PLAYER[playerid][gps_activated]) {
+	if (GPS_PLAYER[playerid][gps_activated])
+	{
 		if (IsPlayerInRangeOfPoint(playerid, 3.5, GPS_LPPLAYER[playerid][0], GPS_LPPLAYER[playerid][1], GPS_LPPLAYER[playerid][2])) return 0;
-	} else {
+	}
+	else
+	{
 		GPS_PLAYER[playerid][gps_activated] = true;
 	}
 

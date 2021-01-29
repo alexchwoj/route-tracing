@@ -1,4 +1,4 @@
-/* 
+/*
 * route-tracing
 * Developed by Atom
 * GitHub: github.com/RealAtom
@@ -23,14 +23,15 @@ enum player_gps
 	gps_color,
 	gps_timer
 }
-new GPS_PLAYER[MAX_PLAYERS][player_gps];
-new PLAYER_GANGZONES[MAX_PLAYERS][50];
+static GPS_PLAYER[MAX_PLAYERS][player_gps];
+static GPS_PLAYER_GANGZONES[MAX_PLAYERS][50];
+
+static GPS_LPPLAYER[MAX_PLAYERS][3];
 
 /* Tracing */
 stock StartTracing(playerid, Float:x, Float:y, Float:z)
 {
 	CancelTracing(playerid);
-	GPS_PLAYER[playerid][gps_activated] = true;
 	GPS_PLAYER[playerid][gps_timer] = SetTimerEx("UpdatePlayerTracing", 500, true, "ifff", playerid, x, y, z);
 	return 1;
 }
@@ -44,10 +45,10 @@ stock CancelTracing(playerid)
 
 		for(new i; i < 50; i ++)
 		{
-			if(PLAYER_GANGZONES[playerid][i] != -1)
+			if(GPS_PLAYER_GANGZONES[playerid][i] != -1)
 			{
-			    GangZoneDestroy(PLAYER_GANGZONES[playerid][i]);
-			    PLAYER_GANGZONES[playerid][i] = -1;
+			    GangZoneDestroy(GPS_PLAYER_GANGZONES[playerid][i]);
+			    GPS_PLAYER_GANGZONES[playerid][i] = -1;
 			}
 		}
 	}
@@ -68,7 +69,7 @@ stock GetTracingColor(playerid)
 /* Updating */
 stock Float:ReturnRouteDistance(Float:init_x, Float:init_y, Float:final_x, Float:final_y)
 {
-	new 
+	new
 		Float:dis_x = floatpower( floatsub(init_x, final_x), 2.0),
 		Float:dis_y = floatpower( floatsub(init_y, final_y), 2.0)
 	;
@@ -79,37 +80,52 @@ stock Float:ReturnRouteDistance(Float:init_x, Float:init_y, Float:final_x, Float
 forward UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z);
 public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 {
-	new 
+	new
 		Float:pos[3],
 		Float:init_distance,
 		MapNode:point[2]
 	;
 
+	if (GPS_PLAYER[playerid][gps_activated]) {
+		if (IsPlayerInRangeOfPoint(playerid, 3.5, GPS_LPPLAYER[playerid][0], GPS_LPPLAYER[playerid][1], GPS_LPPLAYER[playerid][2])) return 0;
+	} else {
+		GPS_PLAYER[playerid][gps_activated] = true;
+	}
+
+
 	GetPlayerPos(playerid, pos[0], pos[1], pos[2]);
+
+	GPS_LPPLAYER[playerid][0] = pos[0];
+	GPS_LPPLAYER[playerid][1] = pos[1];
+	GPS_LPPLAYER[playerid][2] = pos[2];
+
 	init_distance = ReturnRouteDistance(x, y, pos[0], pos[1]);
 
 	if (init_distance <= 2.0) return CancelTracing(playerid);
 	if (GetClosestMapNodeToPoint(pos[0], pos[1], pos[2], point[0]) != 0) return 0;
-    if (GetClosestMapNodeToPoint(x, y, z, point[1])) return 0;
-    if (FindPathThreaded(point[0], point[1], "OnRouteCalculated", "i", playerid)) return 1;
+	if (GetClosestMapNodeToPoint(x, y, z, point[1])) return 0;
+	if (FindPathThreaded(point[0], point[1], "OnRouteCalculated", "i", playerid) != GPS_ERROR_NONE)
+	{
+		print("[route-tracing] UpdatePlayerTracing ha refenciado un nodo invalido.");
+	}
 	return 1;
 }
 
 public OnRouteCalculated(Path:pathid, playerid)
 {
-    if(!IsValidPath(pathid)) return 0;
+	if(!IsValidPath(pathid)) return 0;
 
-    /* Destroy old gangzones */
+	/* Destroy old gangzones */
 	for(new i; i < 50; i ++)
 	{
-		if(PLAYER_GANGZONES[playerid][i] != -1)
+		if(GPS_PLAYER_GANGZONES[playerid][i] != -1)
 		{
-		    GangZoneDestroy(PLAYER_GANGZONES[playerid][i]);
-		    PLAYER_GANGZONES[playerid][i] = -1;
+			GangZoneDestroy(GPS_PLAYER_GANGZONES[playerid][i]);
+			GPS_PLAYER_GANGZONES[playerid][i] = -1;
 		}
 	}
 
-	new 
+	new
 		index,
 		size,
 		MapNode:nodeid,
@@ -160,7 +176,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 						break;
 					}
 
-					if(PLAYER_GANGZONES[playerid][slot] == -1)
+					if(GPS_PLAYER_GANGZONES[playerid][slot] == -1)
 					{
 						break;
 					}
@@ -169,8 +185,8 @@ public OnRouteCalculated(Path:pathid, playerid)
 
 				if(slot == -1) return 1;
 
-				PLAYER_GANGZONES[playerid][slot] = GangZoneCreate(node_pos[0] - 12.5, node_pos[1] - 12.5, node_pos[0] + 12.5, node_pos[1] + 12.5);
-				GangZoneShowForPlayer(playerid, PLAYER_GANGZONES[playerid][slot], GPS_PLAYER[playerid][gps_color]);
+				GPS_PLAYER_GANGZONES[playerid][slot] = GangZoneCreate(node_pos[0] - 12.5, node_pos[1] - 12.5, node_pos[0] + 12.5, node_pos[1] + 12.5);
+				GangZoneShowForPlayer(playerid, GPS_PLAYER_GANGZONES[playerid][slot], GPS_PLAYER[playerid][gps_color]);
 			}
 		}
 
@@ -184,7 +200,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 public OnGameModeInit()
 {
 	printf("[-] route-tracing v"ROUTE_TRACING_VERSION" by Atom initialized successfully [-]");
-	
+
 	#if defined OT_OnGameModeInit
 		return OT_OnGameModeInit();
 	#else

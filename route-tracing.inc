@@ -23,7 +23,7 @@
 
 // Configuration
 #define ROUTE_TRACING_VERSION "0.0.2" // Version of route-tracing
-#define MAX_ROUTE_GANGZONES 256 // Maximum number of gangzones to use (default: 256)
+#define MAX_ROUTE_GANGZONES 512 // Maximum number of gangzones to use (default: 512)
 #define ROUTE_UPDATE_DELAY 500 // Delay to recalculate the route (default: 500)
 #define MAX_PLAYER_GANGZONES 1024 // Size of gangzones array (default: 1024)
 #define ROUTE_TRACING_DEBUG // This triggers messages about the execution and calculation of the nodes, it is not recommended for the production environment
@@ -58,7 +58,7 @@ static enum _:player_gangzone
 static PLAYER_GANGZONE[MAX_PLAYERS][MAX_PLAYER_GANGZONES][player_gangzone];
 
 // Gangzone
-stock PlayerGangZoneCreate(playerid, Float:minx, Float:miny, Float:maxx, Float:maxy)
+PlayerGangZoneCreate(playerid, Float:minx, Float:miny, Float:maxx, Float:maxy)
 {
 	new idx;
 	for (new i = 0; i < MAX_PLAYER_GANGZONES; ++i)
@@ -84,7 +84,7 @@ stock PlayerGangZoneCreate(playerid, Float:minx, Float:miny, Float:maxx, Float:m
 	return idx;
 }
 
-stock PlayerGangZoneShow(playerid, gangzoneid, color = 0xFFFFFFAA)
+PlayerGangZoneShow(playerid, gangzoneid, color = 0xFFFFFFAA)
 {
 	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
 
@@ -109,7 +109,7 @@ stock PlayerGangZoneShow(playerid, gangzoneid, color = 0xFFFFFFAA)
 	return 1;
 }
 
-stock PlayerGangZoneHide(playerid, gangzoneid)
+PlayerGangZoneHide(playerid, gangzoneid)
 {
 	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || 
 		!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown] ||
@@ -128,6 +128,11 @@ stock PlayerGangZoneHide(playerid, gangzoneid)
 	return 1;
 }
 
+/*
+* Note:
+* PlayerGangZoneFlash and PlayerGangZoneStopFlash they remain as stock since they
+* are not used, at least in route-tracing, I leave it in case someone wants to make a profit
+*/
 stock PlayerGangZoneFlash(playerid, gangzoneid, color = 0xFF0000AA)
 {
 	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
@@ -170,7 +175,7 @@ stock PlayerGangZoneStopFlash(playerid, gangzoneid)
 	return 1;
 }
 
-stock PlayerGangZoneDestroy(playerid, gangzoneid)
+PlayerGangZoneDestroy(playerid, gangzoneid)
 {
 	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
 	if (PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown])

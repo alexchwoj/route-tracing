@@ -11,6 +11,7 @@
 
 #include <a_samp>
 #include <GPS>
+#include <Pawn.RakNet>
 
 #define ROUTE_TRACING_VERSION "0.0.2"
 
@@ -25,7 +26,7 @@ enum player_gps
 }
 static GPS_PLAYER[MAX_PLAYERS][player_gps];
 static GPS_PLAYER_GANGZONES[MAX_PLAYERS][50];
-static GPS_PLAYER_POSITION[MAX_PLAYERS][3];
+static Float:GPS_PLAYER_POSITION[MAX_PLAYERS][3];
 
 // Tracing
 stock StartTracing(playerid, Float:x, Float:y, Float:z)

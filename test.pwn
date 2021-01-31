@@ -1,6 +1,5 @@
 #include <a_samp>
-#include <core>
-#include <float>
+#include <Pawn.CMD>
 #include "../../route-tracing.inc"
 
 main()
@@ -10,7 +9,7 @@ main()
 
 public OnPlayerConnect(playerid)
 {
-	GameTextForPlayer(playerid,"~w~route-tracing", 5000, 5);
+	GameTextForPlayer(playerid, "~w~route-tracing", 5000, 5);
 	return 1;
 }
 
@@ -26,39 +25,34 @@ public OnPlayerRequestClass(playerid, classid)
 	return 0;
 }
 
-
-public OnPlayerCommandText(playerid, cmdtext[])
+CMD:mp5(playerid, params[])
 {
-	if (strcmp("/mp5", cmdtext, true, 10) == 0)
-	{
-		GivePlayerWeapon(playerid, 29, 100);
-		return 1;
-	}
+	GivePlayerWeapon(playerid, 29, 100);
+	return 1;
+}
 
-	if (strcmp("/testveh", cmdtext, true, 10) == 0)
-	{
-		CreateVehicle(411, 1589.339843, -1054.775756, 23.633340, 90.0, -1, -1, 0, 0);
-		return 1;
-	}
+CMD:infernus(playerid, params[])
+{
+	CreateVehicle(411, 1589.339843, -1054.775756, 23.633340, 90.0, -1, -1, 0, 0);
+	return 1;
+}
 
-	if(strcmp("/red", cmdtext, true, 10) == 0)
-	{
-		SetTracingColor(playerid, 0xEE3636FF);
-		return 1;
-	}
+CMD:red(playerid, params[])
+{
+	SetTracingColor(playerid, 0xEE3636FF);
+	return 1;
+}
 
-	if(strcmp("/green", cmdtext, true, 10) == 0)
-	{
-		SetTracingColor(playerid, 0x51D14EFF);
-		return 1;
-	}
+CMD:green(playerid, params[])
+{
+	SetTracingColor(playerid, 0x51D14EFF);
+	return 1;
+}
 
-	if(strcmp("/yellow", cmdtext, true, 10) == 0)
-	{
-		SetTracingColor(playerid, 0xF9D632FF);
-		return 1;
-	}
-	return 0;
+CMD:yellow(playerid, params[])
+{
+	SetTracingColor(playerid, 0xF9D632FF);
+	return 1;
 }
 
 public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)

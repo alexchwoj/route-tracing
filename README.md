@@ -39,3 +39,5 @@ GetTracingColor(playerid);
 * [Atom](https://github.com/RealAtom) - Programming
 * [kristo](https://github.com/kristoisberg) - Modern GPS Plugin
 * [katursis](https://github.com/katursis) - Pawn.RakNet
+
+This library was tested using [Magma](https://github.com/RealAtom/magma)

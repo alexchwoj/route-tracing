@@ -24,8 +24,8 @@
 // Configuration
 #define ROUTE_TRACING_VERSION "0.0.2" // Version of route-tracing
 #define MAX_ROUTE_GANGZONES 512 // Maximum number of gangzones to use (default: 512)
-#define ROUTE_UPDATE_DELAY 500 // Delay to recalculate the route (default: 500)
-#define MAX_PLAYER_GANGZONES 1024 // Size of gangzones array (default: 1024)
+#define ROUTE_UPDATE_DELAY 1000 // Delay to recalculate the route (default: 1000)
+#define MAX_PLAYER_GANGZONES 512 // Size of gangzones array (default: 512)
 #define ROUTE_TRACING_DEBUG // This triggers messages about the execution and calculation of the nodes, it is not recommended for the production environment
 
 // Headers
@@ -94,10 +94,10 @@ PlayerGangZoneShow(playerid, gangzoneid, color = 0xFFFFFFAA)
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown] = true;
 	new abgr_color = (((color << 16) | color & 0xFF00) << 8) | (((color >>> 16) | color & 0xFF0000) >>> 8);
 
-	new BitStream:gz_bs = BS_New();
+	new BitStream:bs = BS_New();
 		
 	BS_WriteValue(
-		gz_bs,
+		bs,
 		PR_UINT16, 1023 - gangzoneid,
 		PR_FLOAT, PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MinX],
 		PR_FLOAT, PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MinY],
@@ -106,8 +106,8 @@ PlayerGangZoneShow(playerid, gangzoneid, color = 0xFFFFFFAA)
 		PR_UINT32, abgr_color
 	);
 		
-	PR_SendRPC(gz_bs, playerid, 0x6C);
-	BS_Delete(gz_bs);
+	PR_SendRPC(bs, playerid, 0x6C);
+	BS_Delete(bs);
 	return 1;
 }
 
@@ -118,15 +118,15 @@ PlayerGangZoneHide(playerid, gangzoneid)
 		gangzoneid > MAX_PLAYER_GANGZONES - 1 || gangzoneid < 0) return 0;
 
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown] = false;
-	new BitStream:gz_bs = BS_New();
+	new BitStream:bs = BS_New();
 		
 	BS_WriteValue(
-		gz_bs,
+		bs,
 		PR_UINT16, 1023 - gangzoneid
 	);
 		
-	PR_SendRPC(gz_bs, playerid, 0x78);
-	BS_Delete(gz_bs);
+	PR_SendRPC(bs, playerid, 0x78);
+	BS_Delete(bs);
 	return 1;
 }
 
@@ -144,16 +144,16 @@ stock PlayerGangZoneFlash(playerid, gangzoneid, color = 0xFF0000AA)
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flashing] = true;
 	new abgr_color = (((color << 16) | color & 0xFF00) << 8) | (((color >>> 16) | color & 0xFF0000) >>> 8);
 
-	new BitStream:gz_bs = BS_New();
+	new BitStream:bs = BS_New();
 		
 	BS_WriteValue(
-		gz_bs,
+		bs,
 		PR_UINT16, 1023 - gangzoneid,
 		PR_UINT32, abgr_color
 	);
 		
-	PR_SendRPC(gz_bs, playerid, 0x79);
-	BS_Delete(gz_bs);
+	PR_SendRPC(bs, playerid, 0x79);
+	BS_Delete(bs);
 	return 1;
 }
 
@@ -166,15 +166,15 @@ stock PlayerGangZoneStopFlash(playerid, gangzoneid)
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flashing] = false;
 	new abgr_color = (((color << 16) | color & 0xFF00) << 8) | (((color >>> 16) | color & 0xFF0000) >>> 8);
 
-	new BitStream:gz_bs = BS_New();
+	new BitStream:bs = BS_New();
 		
 	BS_WriteValue(
-		gz_bs,
+		bs,
 		PR_UINT16, 1023 - gangzoneid
 	);
 		
-	PR_SendRPC(gz_bs, playerid, 0x55);
-	BS_Delete(gz_bs);
+	PR_SendRPC(bs, playerid, 0x55);
+	BS_Delete(bs);
 	return 1;
 }
 
@@ -260,9 +260,12 @@ forward UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z);
 public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 {
 	new
-		Float:pos[3],
+		Float:px,
+		Float:py,
+		Float:pz,
 		Float:init_distance,
-		MapNode:point[2]
+		MapNode:point_x,
+		MapNode:point_y
 	;
 
 	// Thanks to Markski for this arrangement in the distance check
@@ -276,18 +279,18 @@ public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 	}
 
 	// Update position
-	GetPlayerPos(playerid, pos[0], pos[1], pos[2]);
+	GetPlayerPos(playerid, px, py, pz);
 
-	GPS_PLAYER_POSITION[playerid][0] = pos[0];
-	GPS_PLAYER_POSITION[playerid][1] = pos[1];
-	GPS_PLAYER_POSITION[playerid][2] = pos[2];
+	GPS_PLAYER_POSITION[playerid][0] = px;
+	GPS_PLAYER_POSITION[playerid][1] = py;
+	GPS_PLAYER_POSITION[playerid][2] = pz;
 
-	init_distance = ReturnRouteDistance(x, y, pos[0], pos[1]);
+	init_distance = ReturnRouteDistance(x, y, px, py);
 
 	if (init_distance <= 2.0) return CancelTracing(playerid);
-	if (GetClosestMapNodeToPoint(pos[0], pos[1], pos[2], point[0]) != 0) return 0;
-	if (GetClosestMapNodeToPoint(x, y, z, point[1])) return 0;
-	if (FindPathThreaded(point[0], point[1], "OnRouteCalculated", "i", playerid) != GPS_ERROR_NONE)
+	if (GetClosestMapNodeToPoint(px, py, pz, point_x) != 0) return 0;
+	if (GetClosestMapNodeToPoint(x, y, z, point_y)) return 0;
+	if (FindPathThreaded(point_x, point_y, "OnRouteCalculated", "i", playerid) != GPS_ERROR_NONE)
 	{
 		print("[route-tracing] UpdatePlayerTracing has referenced an invalid node.");
 	}

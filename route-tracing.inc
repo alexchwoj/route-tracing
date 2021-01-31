@@ -11,8 +11,14 @@
 
 // Library
 #include <a_samp> // Source: https://sa-mp.com
-#include <GPS> // Source: https://github.com/kristoisberg/samp-gps-plugin
-#include <Pawn.RakNet> // Source: https://github.com/katursis/Pawn.RakNet
+
+#if !defined _gps_included
+	#include <GPS> // Source: https://github.com/kristoisberg/samp-gps-plugin
+#endif
+
+#if !defined PAWNRAKNET_INC_
+	#include <Pawn.RakNet> // Source: https://github.com/katursis/Pawn.RakNet
+#endif
 
 // Configuration
 #define ROUTE_TRACING_VERSION "0.0.2" // Version of route-tracing

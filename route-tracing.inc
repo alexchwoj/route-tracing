@@ -9,11 +9,16 @@
 #endif
 #define _ROUTE_TRACING_INCLUDED
 
-#include <a_samp>
-#include <GPS>
-#include <Pawn.RakNet>
+// Library
+#include <a_samp> // Source: https://sa-mp.com
+#include <GPS> // Source: https://github.com/kristoisberg/samp-gps-plugin
+#include <Pawn.RakNet> // Source: https://github.com/katursis/Pawn.RakNet
 
-#define ROUTE_TRACING_VERSION "0.0.2"
+// Configuration
+#define ROUTE_TRACING_VERSION "0.0.2" // Version of route-tracing
+#define MAX_ROUTE_GANGZONES 256 // Maximum number of gangzones to use (default: 256)
+#define ROUTE_UPDATE_DELAY 500 // Delay to recalculate the route (default: 500)
+#define ROUTE_TRACING_DEBUG // This triggers messages about the execution and calculation of the nodes, it is not recommended for the production environment
 
 // Headers
 forward OnRouteCalculated(Path:pathid, playerid);
@@ -25,25 +30,31 @@ enum player_gps
 	gps_timer
 }
 static GPS_PLAYER[MAX_PLAYERS][player_gps];
-static GPS_PLAYER_GANGZONES[MAX_PLAYERS][50];
+static GPS_PLAYER_GANGZONES[MAX_PLAYERS][MAX_ROUTE_GANGZONES];
 static Float:GPS_PLAYER_POSITION[MAX_PLAYERS][3];
 
 // Tracing
 stock StartTracing(playerid, Float:x, Float:y, Float:z)
 {
 	CancelTracing(playerid);
-	GPS_PLAYER[playerid][gps_timer] = SetTimerEx("UpdatePlayerTracing", 500, true, "ifff", playerid, x, y, z);
+	GPS_PLAYER[playerid][gps_timer] = SetTimerEx("UpdatePlayerTracing", ROUTE_UPDATE_DELAY, true, "ifff", playerid, x, y, z);
 	return 1;
 }
 
 stock CancelTracing(playerid)
 {
+	#if defined ROUTE_TRACING_DEBUG
+		printf("[route-tracing] Tracing cancelled (playerid: %d)", playerid);
+	#endif
+
 	if (GPS_PLAYER[playerid][gps_activated])
 	{
+		// Cancel update
 		GPS_PLAYER[playerid][gps_activated] = false;
 		KillTimer(GPS_PLAYER[playerid][gps_timer]);
 
-		for(new i; i < 50; i ++)
+		// Destroy gangzones
+		for(new i; i < MAX_ROUTE_GANGZONES; i ++)
 		{
 			if (GPS_PLAYER_GANGZONES[playerid][i] != -1)
 			{
@@ -57,6 +68,9 @@ stock CancelTracing(playerid)
 
 stock SetTracingColor(playerid, color)
 {
+	#if defined ROUTE_TRACING_DEBUG
+		printf("[route-tracing] Route color updated (playerid: %d, color: %d)", playerid, color);
+	#endif
 	GPS_PLAYER[playerid][gps_color] = color;
 	return 1;
 }
@@ -86,6 +100,7 @@ public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 		MapNode:point[2]
 	;
 
+	// Thanks to Markski for this arrangement in the distance check
 	if (GPS_PLAYER[playerid][gps_activated])
 	{
 		if (IsPlayerInRangeOfPoint(playerid, 3.5, GPS_PLAYER_POSITION[playerid][0], GPS_PLAYER_POSITION[playerid][1], GPS_PLAYER_POSITION[playerid][2])) return 0;
@@ -95,6 +110,7 @@ public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 		GPS_PLAYER[playerid][gps_activated] = true;
 	}
 
+	// Update position
 	GetPlayerPos(playerid, pos[0], pos[1], pos[2]);
 
 	GPS_PLAYER_POSITION[playerid][0] = pos[0];
@@ -108,7 +124,7 @@ public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 	if (GetClosestMapNodeToPoint(x, y, z, point[1])) return 0;
 	if (FindPathThreaded(point[0], point[1], "OnRouteCalculated", "i", playerid) != GPS_ERROR_NONE)
 	{
-		print("[route-tracing] UpdatePlayerTracing ha refenciado un nodo invalido.");
+		print("[route-tracing] UpdatePlayerTracing has referenced an invalid node.");
 	}
 	return 1;
 }
@@ -118,7 +134,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 	if (!IsValidPath(pathid)) return 0;
 
 	// Destroy old gangzones
-	for(new i; i < 50; i ++)
+	for(new i; i < MAX_ROUTE_GANGZONES; i ++)
 	{
 		if (GPS_PLAYER_GANGZONES[playerid][i] != -1)
 		{
@@ -140,11 +156,12 @@ public OnRouteCalculated(Path:pathid, playerid)
 
 	if (size == 1) return CancelTracing(playerid);
 
+	// Create gangzones
 	GetPlayerPos(playerid, pos[3], pos[4], pos[5]);
 	GetClosestMapNodeToPoint(pos[3], pos[4], pos[5], nodeid);
 	GetMapNodePos(nodeid, pos[3], pos[4], pos[5]);
 
-	for(new x = 0; x < 50; x ++)
+	for(new x = 0; x < MAX_ROUTE_GANGZONES; x ++)
 	{
 		GetPathNode(pathid, x, nodeid);
 		GetPathNodeIndex(pathid, nodeid, index);
@@ -156,6 +173,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 
 			for(new i = 1; i <= node_size; i++)
 			{
+				// Formula for drawing the route
 				new Float:node_pos[2];
 
 				if (i != 0)
@@ -170,9 +188,9 @@ public OnRouteCalculated(Path:pathid, playerid)
 				}
 
 				new slot;
-				while(slot <= 50)
+				while(slot <= MAX_ROUTE_GANGZONES)
 				{
-					if (slot == 50)
+					if (slot == MAX_ROUTE_GANGZONES)
 					{
 						slot = -1;
 						break;
@@ -207,6 +225,10 @@ public OnRouteCalculated(Path:pathid, playerid)
 // Hooks
 public OnGameModeInit()
 {
+	#if defined ROUTE_TRACING_DEBUG
+		printf("[route-tracing] Hook call: OnGameModeInit()");
+	#endif
+
 	printf("[-] route-tracing v"ROUTE_TRACING_VERSION" by Atom initialized successfully [-]");
 
 	#if defined RT_OnGameModeInit
@@ -228,6 +250,10 @@ public OnGameModeInit()
 
 public OnPlayerConnect(playerid)
 {
+	#if defined ROUTE_TRACING_DEBUG
+		printf("[route-tracing] Hook call: OnPlayerConnect(playerid: %d)", playerid);
+	#endif
+
 	GPS_PLAYER[playerid][gps_color] = 0x9C0DE6FF;
 
 	#if defined RT_OnPlayerConnect
@@ -249,6 +275,10 @@ public OnPlayerConnect(playerid)
 
 public OnPlayerDisconnect(playerid, reason)
 {
+	#if defined ROUTE_TRACING_DEBUG
+		printf("[route-tracing] Hook call: OnPlayerDisconnect(playerid: %d, reason: %d)", playerid, reason);
+	#endif
+
 	CancelTracing(playerid);
 
 	#if defined RT_OnPlayerDisconnect

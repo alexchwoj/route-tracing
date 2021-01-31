@@ -168,7 +168,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 					node_pos[1] = pos[4];
 				}
 
-				new slot = 0;
+				new slot;
 				while(slot <= 50)
 				{
 					if (slot == 50)
@@ -192,7 +192,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 					node_pos[0] + 12.5,
 					node_pos[1] + 12.5
 				);
-				
+
 				GangZoneShowForPlayer(playerid, GPS_PLAYER_GANGZONES[playerid][slot], GPS_PLAYER[playerid][gps_color]);
 			}
 		}

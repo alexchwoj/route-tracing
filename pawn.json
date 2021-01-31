@@ -5,6 +5,7 @@
 	"output": "test.amx",
 	"dependencies": [
 		"sampctl/samp-stdlib",
-		"kristoisberg/samp-gps-plugin"
+		"kristoisberg/samp-gps-plugin",
+		"katursis/Pawn.RakNet"
 	]
 }

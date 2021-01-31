@@ -10,7 +10,8 @@ Path layout for San Andreas Multiplayer.
 #include <route-tracing>
 ```
 4. Install [Modern GPS](https://github.com/kristoisberg/samp-gps-plugin)
-5. Put `GPS.dat` file in `scriptfiles/`
+5. Install [Pawn.RakNet](https://github.com/katursis/Pawn.RakNet)
+6. Put `GPS.dat` file in `scriptfiles/`
 
 ## Example
 In the `test.pwn` file you have a usage example.
@@ -37,3 +38,4 @@ GetTracingColor(playerid);
 ## Credits
 * [Atom](https://github.com/RealAtom) - Programming
 * [kristo](https://github.com/kristoisberg) - Modern GPS Plugin
+* [katursis](https://github.com/katursis) - Pawn.RakNet

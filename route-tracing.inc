@@ -70,7 +70,8 @@ PlayerGangZoneCreate(playerid, Float:minx, Float:miny, Float:maxx, Float:maxy)
 		}
 	}
 
-	if (idx > MAX_PLAYER_GANGZONES - 1) return -1;
+	if (idx > MAX_PLAYER_GANGZONES - 1)
+		return -1;
 
 	PLAYER_GANGZONE[playerid][idx][gangzone_MinX] = minx;
 	PLAYER_GANGZONE[playerid][idx][gangzone_MinY] = miny;
@@ -86,7 +87,8 @@ PlayerGangZoneCreate(playerid, Float:minx, Float:miny, Float:maxx, Float:maxy)
 
 PlayerGangZoneShow(playerid, gangzoneid, color = 0xFFFFFFAA)
 {
-	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0)
+		return 0;
 
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Color] = color;
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown] = true;
@@ -135,7 +137,8 @@ PlayerGangZoneHide(playerid, gangzoneid)
 */
 stock PlayerGangZoneFlash(playerid, gangzoneid, color = 0xFF0000AA)
 {
-	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0)
+		return 0;
 
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flash_Color]  = color;
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flashing] = true;
@@ -177,7 +180,9 @@ stock PlayerGangZoneStopFlash(playerid, gangzoneid)
 
 PlayerGangZoneDestroy(playerid, gangzoneid)
 {
-	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES - 1 || gangzoneid < 0)
+		return 0;
+	
 	if (PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown])
 		PlayerGangZoneHide(playerid, gangzoneid);
 	
@@ -291,7 +296,8 @@ public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 
 public OnRouteCalculated(Path:pathid, playerid)
 {
-	if (!IsValidPath(pathid)) return 0;
+	if (!IsValidPath(pathid))
+		return 0;
 
 	// Destroy old gangzones
 	for(new i; i < MAX_ROUTE_GANGZONES; i ++)
@@ -314,7 +320,8 @@ public OnRouteCalculated(Path:pathid, playerid)
 	GetPathSize(pathid, size);
 	GetPathLength(pathid, length);
 
-	if (size == 1) return CancelTracing(playerid);
+	if (size == 1)
+		return CancelTracing(playerid);
 
 	// Create gangzones
 	GetPlayerPos(playerid, pos[3], pos[4], pos[5]);
@@ -363,7 +370,8 @@ public OnRouteCalculated(Path:pathid, playerid)
 					slot ++;
 				}
 
-				if (slot == -1) return 1;
+				if (slot == -1)
+					return 1;
 
 				GPS_PLAYER_GANGZONES[playerid][slot] = PlayerGangZoneCreate(
 					playerid,

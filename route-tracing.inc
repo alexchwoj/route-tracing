@@ -87,7 +87,7 @@ PlayerGangZoneCreate(playerid, Float:minx, Float:miny, Float:maxx, Float:maxy)
 
 PlayerGangZoneShow(playerid, gangzoneid, color = 0xFFFFFFAA)
 {
-	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0)
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES - 1 || gangzoneid < 0)
 		return 0;
 
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Color] = color;
@@ -115,7 +115,7 @@ PlayerGangZoneHide(playerid, gangzoneid)
 {
 	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || 
 		!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown] ||
-		gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+		gangzoneid > MAX_PLAYER_GANGZONES - 1 || gangzoneid < 0) return 0;
 
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown] = false;
 	new BitStream:gz_bs = BS_New();
@@ -137,7 +137,7 @@ PlayerGangZoneHide(playerid, gangzoneid)
 */
 stock PlayerGangZoneFlash(playerid, gangzoneid, color = 0xFF0000AA)
 {
-	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0)
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES - 1 || gangzoneid < 0)
 		return 0;
 
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flash_Color]  = color;
@@ -161,7 +161,7 @@ stock PlayerGangZoneStopFlash(playerid, gangzoneid)
 {
 	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] ||
 		!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flashing] ||
-		gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+		gangzoneid > MAX_PLAYER_GANGZONES - 1 || gangzoneid < 0) return 0;
 
 	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flashing] = false;
 	new abgr_color = (((color << 16) | color & 0xFF00) << 8) | (((color >>> 16) | color & 0xFF0000) >>> 8);
@@ -314,7 +314,12 @@ public OnRouteCalculated(Path:pathid, playerid)
 		size,
 		MapNode:nodeid,
 		Float:length,
-		Float:pos[6]
+		Float:map_x,
+		Float:map_y,
+		Float:map_z,
+		Float:map_px,
+		Float:map_py,
+		Float:map_pz
 	;
 
 	GetPathSize(pathid, size);
@@ -324,34 +329,37 @@ public OnRouteCalculated(Path:pathid, playerid)
 		return CancelTracing(playerid);
 
 	// Create gangzones
-	GetPlayerPos(playerid, pos[3], pos[4], pos[5]);
-	GetClosestMapNodeToPoint(pos[3], pos[4], pos[5], nodeid);
-	GetMapNodePos(nodeid, pos[3], pos[4], pos[5]);
+	GetPlayerPos(playerid, map_px, map_py, map_pz);
+	GetClosestMapNodeToPoint(map_px, map_py, map_pz, nodeid);
+	GetMapNodePos(nodeid, map_px, map_py, map_pz);
 
 	for(new x = 0; x < MAX_ROUTE_GANGZONES; x ++)
 	{
 		GetPathNode(pathid, x, nodeid);
 		GetPathNodeIndex(pathid, nodeid, index);
-		GetMapNodePos(nodeid, pos[0], pos[1], pos[2]);
+		GetMapNodePos(nodeid, map_x, map_y, map_z);
 
 		if (x == index)
 		{
-			new node_size = floatround( ReturnRouteDistance( pos[3], pos[4], pos[0], pos[1] ) / 12.5 );
+			new node_size = floatround( ReturnRouteDistance( map_px, map_py, map_x, map_y ) / 12.5 );
 
 			for(new i = 1; i <= node_size; i++)
 			{
 				// Formula for drawing the route
-				new Float:node_pos[2];
+				new
+					Float:node_x
+					Float:node_y
+				;
 
 				if (i != 0)
 				{
-					node_pos[0] = pos[3] + (((pos[0] - pos[3]) / node_size) * i);
-					node_pos[1] = pos[4] + (((pos[1] - pos[4]) / node_size) * i);
+					node_x = map_px + (((map_x - map_px) / node_size) * i);
+					node_y = map_py + (((map_y - map_py) / node_size) * i);
 				}
 				else
 				{
-					node_pos[0] = pos[3];
-					node_pos[1] = pos[4];
+					node_x = map_px;
+					node_y = map_py;
 				}
 
 				new slot;
@@ -375,18 +383,18 @@ public OnRouteCalculated(Path:pathid, playerid)
 
 				GPS_PLAYER_GANGZONES[playerid][slot] = PlayerGangZoneCreate(
 					playerid,
-					node_pos[0] - 12.5,
-					node_pos[1] - 12.5,
-					node_pos[0] + 12.5,
-					node_pos[1] + 12.5
+					node_x - 12.5,
+					node_y - 12.5,
+					node_x + 12.5,
+					node_y + 12.5
 				);
 
 				PlayerGangZoneShow(playerid, GPS_PLAYER_GANGZONES[playerid][slot], GPS_PLAYER[playerid][gps_Color]);
 			}
 		}
 
-		pos[3] = pos[0] + 0.5;
-		pos[4] = pos[1] + 0.5;
+		map_px = map_x + 0.5;
+		map_py = map_y + 0.5;
 	}
     return 1;
 }

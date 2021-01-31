@@ -2,6 +2,7 @@
 * route-tracing
 * Developed by Atom
 * GitHub: github.com/RealAtom
+* Special thanks: Boorz, Marski, Kristo, Katursis, AmyrAhmady and my momma
 */
 
 #if defined ROUTE_TRACING_INCLUDED
@@ -103,7 +104,7 @@ stock PlayerGangZoneShow(playerid, gangzoneid, color = 0xFFFFFFAA)
 		PR_UINT32, abgr_color
 	);
 		
-	BS_RPC(gz_bs, playerid, 0x6C);
+	PR_SendRPC(gz_bs, playerid, 0x6C);
 	BS_Delete(gz_bs);
 	return 1;
 }
@@ -122,7 +123,7 @@ stock PlayerGangZoneHide(playerid, gangzoneid)
 		PR_UINT16, 1023 - gangzoneid
 	);
 		
-	BS_RPC(gz_bs, playerid, 0x78);
+	PR_SendRPC(gz_bs, playerid, 0x78);
 	BS_Delete(gz_bs);
 	return 1;
 }
@@ -143,7 +144,7 @@ stock PlayerGangZoneFlash(playerid, gangzoneid, color = 0xFF0000AA)
 		PR_UINT32, abgr_color
 	);
 		
-	BS_RPC(gz_bs, playerid, 0x79);
+	PR_SendRPC(gz_bs, playerid, 0x79);
 	BS_Delete(gz_bs);
 	return 1;
 }
@@ -164,7 +165,7 @@ stock PlayerGangZoneStopFlash(playerid, gangzoneid)
 		PR_UINT16, 1023 - gangzoneid
 	);
 		
-	BS_RPC(gz_bs, playerid, 0x55);
+	PR_SendRPC(gz_bs, playerid, 0x55);
 	BS_Delete(gz_bs);
 	return 1;
 }
@@ -211,7 +212,7 @@ stock CancelTracing(playerid)
 		{
 			if (GPS_PLAYER_GANGZONES[playerid][i] != -1)
 			{
-			    GangZoneDestroy(GPS_PLAYER_GANGZONES[playerid][i]);
+			    PlayerGangZoneDestroy(playerid, GPS_PLAYER_GANGZONES[playerid][i]);
 			    GPS_PLAYER_GANGZONES[playerid][i] = -1;
 			}
 		}
@@ -224,6 +225,7 @@ stock SetTracingColor(playerid, color)
 	#if defined ROUTE_TRACING_DEBUG
 		printf("[route-tracing] Route color updated (playerid: %d, color: %d)", playerid, color);
 	#endif
+
 	GPS_PLAYER[playerid][gps_Color] = color;
 	return 1;
 }
@@ -291,7 +293,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 	{
 		if (GPS_PLAYER_GANGZONES[playerid][i] != -1)
 		{
-			GangZoneDestroy(GPS_PLAYER_GANGZONES[playerid][i]);
+			PlayerGangZoneDestroy(playerid, GPS_PLAYER_GANGZONES[playerid][i]);
 			GPS_PLAYER_GANGZONES[playerid][i] = -1;
 		}
 	}
@@ -358,14 +360,15 @@ public OnRouteCalculated(Path:pathid, playerid)
 
 				if (slot == -1) return 1;
 
-				GPS_PLAYER_GANGZONES[playerid][slot] = GangZoneCreate(
+				GPS_PLAYER_GANGZONES[playerid][slot] = PlayerGangZoneCreate(
+					playerid,
 					node_pos[0] - 12.5,
 					node_pos[1] - 12.5,
 					node_pos[0] + 12.5,
 					node_pos[1] + 12.5
 				);
 
-				GangZoneShowForPlayer(playerid, GPS_PLAYER_GANGZONES[playerid][slot], GPS_PLAYER[playerid][gps_Color]);
+				PlayerGangZoneShow(playerid, GPS_PLAYER_GANGZONES[playerid][slot], GPS_PLAYER[playerid][gps_Color]);
 			}
 		}
 

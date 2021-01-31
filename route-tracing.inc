@@ -4,10 +4,10 @@
 * GitHub: github.com/RealAtom
 */
 
-#if defined _ROUTE_TRACING_INCLUDED
+#if defined ROUTE_TRACING_INCLUDED
 	#endinput
 #endif
-#define _ROUTE_TRACING_INCLUDED
+#define ROUTE_TRACING_INCLUDED
 
 // Library
 #include <a_samp> // Source: https://sa-mp.com
@@ -24,26 +24,173 @@
 #define ROUTE_TRACING_VERSION "0.0.2" // Version of route-tracing
 #define MAX_ROUTE_GANGZONES 256 // Maximum number of gangzones to use (default: 256)
 #define ROUTE_UPDATE_DELAY 500 // Delay to recalculate the route (default: 500)
+#define MAX_PLAYER_GANGZONES 1024 // Size of gangzones array (default: 1024)
 #define ROUTE_TRACING_DEBUG // This triggers messages about the execution and calculation of the nodes, it is not recommended for the production environment
 
 // Headers
 forward OnRouteCalculated(Path:pathid, playerid);
 
-enum player_gps
+static enum _:player_gps
 {
-	bool:gps_activated,
-	gps_color,
-	gps_timer
+	bool:gps_Activated,
+	gps_Color,
+	gps_Timer
 }
+
 static GPS_PLAYER[MAX_PLAYERS][player_gps];
 static GPS_PLAYER_GANGZONES[MAX_PLAYERS][MAX_ROUTE_GANGZONES];
 static Float:GPS_PLAYER_POSITION[MAX_PLAYERS][3];
+
+static enum _:player_gangzone
+{
+	Float:gangzone_MinX,
+	Float:gangzone_MinY,
+	Float:gangzone_MaxX,
+	Float:gangzone_MaxY,
+	gangzone_Color,
+	gangzone_Flash_Color,
+	bool:gangzone_Used,
+	bool:gangzone_Shown,
+	bool:gangzone_Flashing
+}
+
+static PLAYER_GANGZONE[MAX_PLAYERS][MAX_PLAYER_GANGZONES][player_gangzone];
+
+// Gangzone
+stock PlayerGangZoneCreate(playerid, Float:minx, Float:miny, Float:maxx, Float:maxy)
+{
+	new idx;
+	for (new i = 0; i < MAX_PLAYER_GANGZONES; ++i)
+	{
+		if (!PLAYER_GANGZONE[playerid][i][gangzone_Used]) 
+		{
+			idx = i;
+			break;
+		}
+	}
+
+	if (idx > MAX_PLAYER_GANGZONES - 1) return -1;
+
+	PLAYER_GANGZONE[playerid][idx][gangzone_MinX] = minx;
+	PLAYER_GANGZONE[playerid][idx][gangzone_MinY] = miny;
+	PLAYER_GANGZONE[playerid][idx][gangzone_MaxX] = maxx;
+	PLAYER_GANGZONE[playerid][idx][gangzone_MaxY] = maxy;
+	PLAYER_GANGZONE[playerid][idx][gangzone_Color] = 0xFFFFFFAA;
+	PLAYER_GANGZONE[playerid][idx][gangzone_Flash_Color] = 0xFF0000AA;
+	PLAYER_GANGZONE[playerid][idx][gangzone_Used] = true;
+	PLAYER_GANGZONE[playerid][idx][gangzone_Shown] = false;
+	PLAYER_GANGZONE[playerid][idx][gangzone_Flashing] = false;
+	return idx;
+}
+
+stock PlayerGangZoneShow(playerid, gangzoneid, color = 0xFFFFFFAA)
+{
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Color] = color;
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown] = true;
+	new abgr_color = (((color << 16) | color & 0xFF00) << 8) | (((color >>> 16) | color & 0xFF0000) >>> 8);
+
+	new BitStream:gz_bs = BS_New();
+		
+	BS_WriteValue(
+		gz_bs,
+		PR_UINT16, 1023 - gangzoneid,
+		PR_FLOAT, PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MinX],
+		PR_FLOAT, PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MinY],
+		PR_FLOAT, PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MaxX],
+		PR_FLOAT, PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MaxY],
+		PR_UINT32, abgr_color
+	);
+		
+	BS_RPC(gz_bs, playerid, 0x6C);
+	BS_Delete(gz_bs);
+	return 1;
+}
+
+stock PlayerGangZoneHide(playerid, gangzoneid)
+{
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || 
+		!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown] ||
+		gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown] = false;
+	new BitStream:gz_bs = BS_New();
+		
+	BS_WriteValue(
+		gz_bs,
+		PR_UINT16, 1023 - gangzoneid
+	);
+		
+	BS_RPC(gz_bs, playerid, 0x78);
+	BS_Delete(gz_bs);
+	return 1;
+}
+
+stock PlayerGangZoneFlash(playerid, gangzoneid, color = 0xFF0000AA)
+{
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flash_Color]  = color;
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flashing] = true;
+	new abgr_color = (((color << 16) | color & 0xFF00) << 8) | (((color >>> 16) | color & 0xFF0000) >>> 8);
+
+	new BitStream:gz_bs = BS_New();
+		
+	BS_WriteValue(
+		gz_bs,
+		PR_UINT16, 1023 - gangzoneid,
+		PR_UINT32, abgr_color
+	);
+		
+	BS_RPC(gz_bs, playerid, 0x79);
+	BS_Delete(gz_bs);
+	return 1;
+}
+
+stock PlayerGangZoneStopFlash(playerid, gangzoneid)
+{
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] ||
+		!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flashing] ||
+		gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flashing] = false;
+	new abgr_color = (((color << 16) | color & 0xFF00) << 8) | (((color >>> 16) | color & 0xFF0000) >>> 8);
+
+	new BitStream:gz_bs = BS_New();
+		
+	BS_WriteValue(
+		gz_bs,
+		PR_UINT16, 1023 - gangzoneid
+	);
+		
+	BS_RPC(gz_bs, playerid, 0x55);
+	BS_Delete(gz_bs);
+	return 1;
+}
+
+stock PlayerGangZoneDestroy(playerid, gangzoneid)
+{
+	if (!PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] || gangzoneid > MAX_PLAYER_GANGZONES-1 || gangzoneid < 0) return 0;
+	if (PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Shown])
+		PlayerGangZoneHide(playerid, gangzoneid);
+	
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flashing] = false;
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Used] = false;
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MinX] = 0.0;
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MinY] = 0.0;
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MaxX] = 0.0;
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_MaxY] = 0.0;
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Color] = 0;
+	PLAYER_GANGZONE[playerid][gangzoneid][gangzone_Flash_Color] = 0;
+	return 1;
+}
 
 // Tracing
 stock StartTracing(playerid, Float:x, Float:y, Float:z)
 {
 	CancelTracing(playerid);
-	GPS_PLAYER[playerid][gps_timer] = SetTimerEx("UpdatePlayerTracing", ROUTE_UPDATE_DELAY, true, "ifff", playerid, x, y, z);
+	GPS_PLAYER[playerid][gps_Timer] = SetTimerEx("UpdatePlayerTracing", ROUTE_UPDATE_DELAY, true, "ifff", playerid, x, y, z);
 	return 1;
 }
 
@@ -53,11 +200,11 @@ stock CancelTracing(playerid)
 		printf("[route-tracing] Tracing cancelled (playerid: %d)", playerid);
 	#endif
 
-	if (GPS_PLAYER[playerid][gps_activated])
+	if (GPS_PLAYER[playerid][gps_Activated])
 	{
 		// Cancel update
-		GPS_PLAYER[playerid][gps_activated] = false;
-		KillTimer(GPS_PLAYER[playerid][gps_timer]);
+		GPS_PLAYER[playerid][gps_Activated] = false;
+		KillTimer(GPS_PLAYER[playerid][gps_Timer]);
 
 		// Destroy gangzones
 		for(new i; i < MAX_ROUTE_GANGZONES; i ++)
@@ -77,13 +224,13 @@ stock SetTracingColor(playerid, color)
 	#if defined ROUTE_TRACING_DEBUG
 		printf("[route-tracing] Route color updated (playerid: %d, color: %d)", playerid, color);
 	#endif
-	GPS_PLAYER[playerid][gps_color] = color;
+	GPS_PLAYER[playerid][gps_Color] = color;
 	return 1;
 }
 
 stock GetTracingColor(playerid)
 {
-	return GPS_PLAYER[playerid][gps_color];
+	return GPS_PLAYER[playerid][gps_Color];
 }
 
 // Updating
@@ -107,13 +254,13 @@ public UpdatePlayerTracing(playerid, Float:x, Float:y, Float:z)
 	;
 
 	// Thanks to Markski for this arrangement in the distance check
-	if (GPS_PLAYER[playerid][gps_activated])
+	if (GPS_PLAYER[playerid][gps_Activated])
 	{
 		if (IsPlayerInRangeOfPoint(playerid, 3.5, GPS_PLAYER_POSITION[playerid][0], GPS_PLAYER_POSITION[playerid][1], GPS_PLAYER_POSITION[playerid][2])) return 0;
 	}
 	else
 	{
-		GPS_PLAYER[playerid][gps_activated] = true;
+		GPS_PLAYER[playerid][gps_Activated] = true;
 	}
 
 	// Update position
@@ -218,7 +365,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 					node_pos[1] + 12.5
 				);
 
-				GangZoneShowForPlayer(playerid, GPS_PLAYER_GANGZONES[playerid][slot], GPS_PLAYER[playerid][gps_color]);
+				GangZoneShowForPlayer(playerid, GPS_PLAYER_GANGZONES[playerid][slot], GPS_PLAYER[playerid][gps_Color]);
 			}
 		}
 
@@ -260,7 +407,7 @@ public OnPlayerConnect(playerid)
 		printf("[route-tracing] Hook call: OnPlayerConnect(playerid: %d)", playerid);
 	#endif
 
-	GPS_PLAYER[playerid][gps_color] = 0x9C0DE6FF;
+	GPS_PLAYER[playerid][gps_Color] = 0x9C0DE6FF;
 
 	#if defined RT_OnPlayerConnect
 		return RT_OnPlayerConnect(playerid);
@@ -286,6 +433,9 @@ public OnPlayerDisconnect(playerid, reason)
 	#endif
 
 	CancelTracing(playerid);
+
+	for (new i = 0; i < MAX_PLAYER_GANGZONES; ++i)
+		PLAYER_GANGZONE[playerid][i][gangzone_Used] = false;
 
 	#if defined RT_OnPlayerDisconnect
 		return RT_OnPlayerDisconnect(playerid, reason);

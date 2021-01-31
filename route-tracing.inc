@@ -211,11 +211,11 @@ stock CancelTracing(playerid)
 		printf("[route-tracing] Tracing cancelled (playerid: %d)", playerid);
 	#endif
 
+	KillTimer(GPS_PLAYER[playerid][gps_Timer]);
 	if (GPS_PLAYER[playerid][gps_Activated])
 	{
 		// Cancel update
 		GPS_PLAYER[playerid][gps_Activated] = false;
-		KillTimer(GPS_PLAYER[playerid][gps_Timer]);
 
 		// Destroy gangzones
 		for(new i; i < MAX_ROUTE_GANGZONES; i ++)

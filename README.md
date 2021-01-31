@@ -24,8 +24,12 @@ public OnPlayerClickMap(playerid, Float:fX, Float:fY, Float:fZ)
 }
 ```
 
+# How works?
+So that routes can be drawn at great distances route-tracing has built-in functions to create gangzones per player, using Pawn.RakNet, 512 gang zones are reserved for operation. Before it was not used, making the limit of 50 gangzones making no more than 20 players can use them at the same time.
+
 ## Demostration
 ![](https://i.imgur.com/hn8QaUV.png)
+![](https://media.discordapp.net/attachments/804497389678362684/805292769882669146/unknown.png)
 
 ## Fuctions
 ```pawn
@@ -41,3 +45,6 @@ GetTracingColor(playerid);
 * [katursis](https://github.com/katursis) - Pawn.RakNet
 
 This library was tested using [Magma](https://github.com/RealAtom/magma)
+
+
+A little note, if you are another Hispanic Roleplayer who is going to use it for their low quality server, leave me a damn star at least.

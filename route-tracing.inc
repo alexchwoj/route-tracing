@@ -347,7 +347,7 @@ public OnRouteCalculated(Path:pathid, playerid)
 			{
 				// Formula for drawing the route
 				new
-					Float:node_x
+					Float:node_x,
 					Float:node_y
 				;
 

@@ -1,6 +1,9 @@
 # route-tracing
 Path layout for San Andreas Multiplayer.
 
+## Read
+A little note, if you are another Hispanic Roleplayer who is going to use it for their low quality server, leave me a damn star at least.
+
 ## Implementation
 
 1. Download the latest version in [releases](https://github.com/RealAtom/route-tracing/releases)
@@ -43,8 +46,3 @@ GetTracingColor(playerid);
 * [Atom](https://github.com/RealAtom) - Programming
 * [kristo](https://github.com/kristoisberg) - Modern GPS Plugin
 * [katursis](https://github.com/katursis) - Pawn.RakNet
-
-This library was tested using [Magma](https://github.com/RealAtom/magma)
-
-
-A little note, if you are another Hispanic Roleplayer who is going to use it for their low quality server, leave me a damn star at least.

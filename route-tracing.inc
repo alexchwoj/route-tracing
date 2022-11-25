@@ -2,7 +2,7 @@
 * route-tracing
 * Developed by Atom
 * GitHub: github.com/RealAtom
-* Special thanks: Boorz, Marski, Kristo, Katursis, AmyrAhmady and my momma
+* Special thanks: Boorz, Marski, Kristo, Katursis, AmyrAhmady
 */
 
 #if defined ROUTE_TRACING_INCLUDED

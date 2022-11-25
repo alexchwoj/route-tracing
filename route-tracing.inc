@@ -1,7 +1,7 @@
 /*
 * route-tracing
-* Developed by Atom
-* GitHub: github.com/RealAtom
+* Developed by alexchwoj
+* GitHub: github.com/alexchwoj
 * Special thanks: Boorz, Marski, Kristo, Katursis, AmyrAhmady
 */
 

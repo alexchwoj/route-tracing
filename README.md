@@ -1,9 +1,6 @@
 # route-tracing
 Path layout for San Andreas Multiplayer.
 
-## Read
-Just a friendly note, if you're another Hispanic Roleplayer planning to use it for your low-quality server, please consider leaving me a star, at the very least.
-
 ## Implementation
 
 1. Download the latest version in [releases](https://github.com/alexchwoj/route-tracing/releases)

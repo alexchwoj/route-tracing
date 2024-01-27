@@ -2,7 +2,7 @@
 Path layout for San Andreas Multiplayer.
 
 ## Read
-A little note, if you are another Hispanic Roleplayer who is going to use it for their low quality server, leave me a damn star at least.
+Just a friendly note, if you're another Hispanic Roleplayer planning to use it for your low-quality server, please consider leaving me a star, at the very least.
 
 ## Implementation
 

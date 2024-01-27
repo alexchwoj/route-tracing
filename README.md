@@ -6,15 +6,14 @@ Just a friendly note, if you're another Hispanic Roleplayer planning to use it f
 
 ## Implementation
 
-1. Download the latest version in [releases](https://github.com/RealAtom/route-tracing/releases)
-2. Put the `route-tracing.inc` file in `pawno/include`
-3. Enter this line in your initial script
+1. Download the latest version in [releases](https://github.com/alexchwoj/route-tracing/releases)
+2. Enter this line in your initial script
 ```pawn
 #include <route-tracing>
 ```
-4. Install [Modern GPS](https://github.com/kristoisberg/samp-gps-plugin)
-5. Install [Pawn.RakNet](https://github.com/katursis/Pawn.RakNet)
-6. Put `GPS.dat` file in `scriptfiles/`
+3. Install [Modern GPS](https://github.com/kristoisberg/samp-gps-plugin)
+4. Install [Pawn.RakNet](https://github.com/katursis/Pawn.RakNet)
+5. Put `GPS.dat` file in `scriptfiles/`
 
 ## Example
 In the `test.pwn` file you have a usage example.
